@@ -1,16 +1,19 @@
 USE BrazilianECommerce;
 GO
 
+SET NOCOUNT ON;
+
 -- ====================================================================
 -- SCRIPT: 01_data_cleaning.sql
 -- PROJECT: Olist Brazilian E-Commerce Analysis
--- PURPOSE: Inspect, clean, replace missing values, and normalize data.
+-- PURPOSE: Clean raw tables, handle NULLs, fix column schema issues,
+--          and deduplicate geolocation data for analytical readiness.
 -- ====================================================================
 
 -- --------------------------------------------------------------------
--- STEP 1: INITIAL INSPECTION & ROW COUNT VERIFICATION
+-- STEP 1: INITIAL INSPECTION & RECORD COUNTS
 -- --------------------------------------------------------------------
--- Check total row counts for all core tables to establish a baseline.
+-- Check total row counts across all raw tables to establish a baseline.
 SELECT 'olist_orders_dataset' AS table_name, COUNT(*) AS total_rows FROM olist_orders_dataset
 UNION ALL
 SELECT 'olist_order_items_dataset', COUNT(*) FROM olist_order_items_dataset
@@ -19,46 +22,54 @@ SELECT 'olist_customers_dataset', COUNT(*) FROM olist_customers_dataset
 UNION ALL
 SELECT 'olist_products_dataset', COUNT(*) FROM olist_products_dataset
 UNION ALL
+SELECT 'olist_sellers_dataset', COUNT(*) FROM olist_sellers_dataset
+UNION ALL
 SELECT 'olist_order_payments_dataset', COUNT(*) FROM olist_order_payments_dataset
 UNION ALL
-SELECT 'olist_order_reviews_dataset', COUNT(*) FROM olist_order_reviews_dataset;
+SELECT 'olist_order_reviews_dataset', COUNT(*) FROM olist_order_reviews_dataset
+UNION ALL
+SELECT 'product_category_name_translation', COUNT(*) FROM product_category_name_translation;
 
 
 -- --------------------------------------------------------------------
--- STEP 2: ORDERS DATASET CLEANING & TIMESTAMP CONVERSION
+-- STEP 2: FIX TRANSLATION SCHEMA & COLUMN NAMES
 -- --------------------------------------------------------------------
--- Inspect missing timestamp values in the orders table.
--- Note: NULLs in 'order_delivered_customer_date' are legitimate for canceled or shipped orders.
-SELECT 
-    order_status,
-    COUNT(*) AS total_orders,
-    SUM(CASE WHEN order_approved_at IS NULL THEN 1 ELSE 0 END) AS missing_approval_date,
-    SUM(CASE WHEN order_delivered_carrier_date IS NULL THEN 1 ELSE 0 END) AS missing_carrier_date,
-    SUM(CASE WHEN order_delivered_customer_date IS NULL THEN 1 ELSE 0 END) AS missing_delivery_date
-FROM olist_orders_dataset
-GROUP BY order_status
-ORDER BY total_orders DESC;
+-- Auto-rename default imported columns (column1, column2) to standard names
+-- to avoid Msg 207 (Invalid column name) during downstream joins.
+IF EXISTS (
+    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS 
+    WHERE TABLE_NAME = 'product_category_name_translation' AND COLUMN_NAME = 'column1'
+)
+BEGIN
+    EXEC sp_rename 'product_category_name_translation.column1', 'product_category_name', 'COLUMN';
+    EXEC sp_rename 'product_category_name_translation.column2', 'product_category_name_english', 'COLUMN';
+END;
 
 
 -- --------------------------------------------------------------------
 -- STEP 3: PRODUCTS DATASET - HANDLING MISSING CATEGORIES
 -- --------------------------------------------------------------------
--- Check for NULL or blank product categories
-SELECT COUNT(*) AS missing_category_count
-FROM olist_products_dataset
-WHERE product_category_name IS NULL OR product_category_name = '';
-
--- Fill missing product category values with 'unspecified'
+-- Fill NULL or empty product categories with 'unspecified' placeholder
 UPDATE olist_products_dataset
 SET product_category_name = 'unspecified'
-WHERE product_category_name IS NULL OR product_category_name = '';
+WHERE product_category_name IS NULL OR LTRIM(RTRIM(product_category_name)) = '';
 
 
 -- --------------------------------------------------------------------
--- STEP 4: GEOLOCATION DEDUPLICATION
+-- STEP 4: REVIEWS DATASET - TEXT PLACEHOLDERS
 -- --------------------------------------------------------------------
--- Issue: olist_geolocation_dataset contains multiple lat/long pairs for the same zip code.
--- Solution: Aggregate coordinates by zip code to create a clean 1-to-1 lookup table.
+-- Fill missing review titles and messages with default text placeholders
+UPDATE olist_order_reviews_dataset
+SET review_comment_title = ISNULL(NULLIF(review_comment_title, ''), 'No Title'),
+    review_comment_message = ISNULL(NULLIF(review_comment_message, ''), 'No Message');
+
+
+-- --------------------------------------------------------------------
+-- STEP 5: GEOLOCATION DEDUPLICATION (ZIP-CODE AGGREGATION)
+-- --------------------------------------------------------------------
+-- Problem: Raw geolocation table has duplicate ZIP prefixes with slightly different coordinates,
+--          causing Many-to-Many join issues in Power BI.
+-- Solution: Aggregate latitude/longitude to create a clean 1-to-1 lookup table.
 
 IF OBJECT_ID('dim_geolocation_clean', 'U') IS NOT NULL 
     DROP TABLE dim_geolocation_clean;
@@ -73,29 +84,21 @@ INTO dim_geolocation_clean
 FROM olist_geolocation_dataset
 GROUP BY geolocation_zip_code_prefix;
 
--- Verify unique zip codes in the new lookup table
-SELECT COUNT(DISTINCT zip_code_prefix) AS unique_zip_codes, COUNT(*) AS total_rows 
+-- Verify 1-to-1 uniqueness
+SELECT 
+    COUNT(DISTINCT zip_code_prefix) AS unique_zip_codes, 
+    COUNT(*) AS total_aggregated_rows 
 FROM dim_geolocation_clean;
-
-
--- --------------------------------------------------------------------
--- STEP 5: REVIEWS DATASET - TEXT & SCORE CLEANING
--- --------------------------------------------------------------------
--- Handle missing review title/comment message (replace NULL with empty placeholder)
-UPDATE olist_order_reviews_dataset
-SET review_comment_title = ISNULL(review_comment_title, 'No Title'),
-    review_comment_message = ISNULL(review_comment_message, 'No Message');
 
 
 -- --------------------------------------------------------------------
 -- STEP 6: DATA INTEGRITY & ANOMALY CHECKS
 -- --------------------------------------------------------------------
--- Check for negative or zero prices/freight costs
-SELECT COUNT(*) AS invalid_price_rows
+-- Validate price and payment thresholds to ensure no corrupted financial metrics
+SELECT 'Invalid Price Items' AS check_type, COUNT(*) AS anomaly_count
 FROM olist_order_items_dataset
-WHERE price <= 0 OR freight_value < 0;
-
--- Check for invalid payment values
-SELECT COUNT(*) AS invalid_payment_rows
+WHERE price <= 0 OR freight_value < 0
+UNION ALL
+SELECT 'Invalid Payments', COUNT(*)
 FROM olist_order_payments_dataset
 WHERE payment_value <= 0;
