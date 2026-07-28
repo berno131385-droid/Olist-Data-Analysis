@@ -26,7 +26,7 @@ To drive profit growth and reduce churn, analysis was conducted across supply ch
 * **Database & Transformation:** SQL Server (SSMS) — Data cleaning, schema DDL, window functions, CTEs.
 * **Data Modeling:** Star Schema (1 Fact Table, 4 Dimension Tables) via DBML / dbdiagram.io.
 * **Business Analytics Engine:** RFM Segmentation, Pareto (80/20) Analysis, Logistics Delay Impact Metrics.
-* **Data Visualization:** Power BI *(In Progress)*.
+* **Data Visualization:** Power BI 
 
 ---
 
@@ -40,7 +40,7 @@ Raw transactional data contained missing values, text formatting inconsistencies
 3. **Missing Value Handling:** Replaced `NULL` values in category names and customer review titles with standardized text placeholders (`unspecified`, `No Title`).
 4. **Data Integrity:** Validated freight costs, product dimensions, and payment thresholds to eliminate negative/zero anomalies.
 
-📄 **[View SQL Cleaning Script](./SQL_Data_Cleaning)**
+📄 **[View SQL Cleaning Script](./Data_Cleaning.sql)**
 
 ---
 
@@ -49,14 +49,6 @@ Raw transactional data contained missing values, text formatting inconsistencies
 To maximize query execution speed and optimize DAX measures in Power BI, the raw relational database was modeled into a **Star Schema** architecture.
 # Olist-Data-Analysis
 <img width="1397" height="1126" alt="Schema" src="https://github.com/user-attachments/assets/5704e547-f25e-4bfb-81d9-b9ad928720d0" />
-### Key Model Entities:
-* **`fact_order_items` (Central Fact Table):** Contains transactional granular records, product prices, freight costs, and delivery lag calculations.
-* **`dim_customers`:** Unique customer identifiers, state, and geographic prefixes.
-* **`dim_products`:** Item physical characteristics and English category mappings.
-* **`dim_sellers`:** Merchant locations and regional parameters.
-* **`dim_date`:** Specialized analytical calendar supporting Time Intelligence calculations.
-
-📄 **[View Schema Creation DDL Script](./02_schema_ddl.sql)** *(or view script in repo)*
 
 ---
 
