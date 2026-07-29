@@ -67,7 +67,43 @@ Five comprehensive analytical scripts were developed to answer core operational 
 ---
 
 ## 📈 Step 4: Power BI Interactive Dashboard
+The interactive Power BI report consists of three dedicated pages designed to transition from high-level executive metrics down to operational supply-chain issues and customer retention dynamics.
+
+---
+
+### Page 1: Executive Overview
+
+> **Context:** This view provides a high-level summary of business performance, overall revenue generation, order volumes, and market geography.
 <img width="1150" height="652" alt="1" src="https://github.com/user-attachments/assets/6064ed42-2b37-4bad-8f44-1b973f84d4cc" />
+
+#### 💡 Key Insights:
+* **Revenue Drivers:** Platform accumulated **$15.84M in Total GMV** across **99K orders**, maintaining an **Average Order Value (AOV) of $160.58**.
+* **Regional Dominance:** The state of São Paulo (**SP**) generates the vast majority of total revenue, outperforming all other states by a significant margin.
+* **Top Categories:** `health_beauty`, `watches_gifts`, and `bed_bath_table` lead in revenue, serving as the core commercial drivers for the platform.
+
+---
+
+### Page 2: Logistics & Quality Deep-Dive
+
+> **Context:** This view investigates operational bottlenecks, evaluating how logistics fulfillment timelines directly impact customer review scores and brand reputation.
+
+
 <img width="1137" height="652" alt="2" src="https://github.com/user-attachments/assets/4c082e2f-12cb-432d-b100-1592f0001899" />
 
+#### 💡 Key Insights:
+* **Rating Degradation:** Delivery speed is the single primary driver of customer satisfaction. On-time orders average a **4.29★ rating**, whereas severe delays (>10 days) cause scores to plummet to **1.71★**.
+* **Geographic Friction:** Remote Northern states (e.g., **AP, RR, AM**) experience critical fulfillment delays, averaging **25–28 days per delivery**.
+* **Seller Quality Control:** Isolated a group of **High-Risk Sellers** with high order volumes (>30 orders) but unacceptably low satisfaction ratings (<3.5★), providing actionable targets for vendor management.
+
+---
+
+### Page 3: Customer Retention & Purchasing Patterns
+
+> **Context:** This view focuses on customer lifetime value drivers, analyzing repeat purchase behavior, order distribution across weekdays, and top revenue-generating municipalities.
+
 <img width="1135" height="617" alt="3" src="https://github.com/user-attachments/assets/f599daec-6b8f-438c-93c4-a592553264da" />
+
+#### 💡 Key Insights:
+* **Retention Bottleneck:** The platform faces a severe retention challenge — **96.97% of customers are one-time buyers**, with a Repeat Customer Rate of just **~3.0%**.
+* **Peak Activity:** Order volume spikes during weekdays (**Monday–Wednesday**) and drops noticeably over the weekend (lowest on **Saturday**), providing clear timing guidelines for promotional push notifications and marketing campaigns.
+* **City Concentration:** Capital municipalities (**São Paulo, Rio de Janeiro, Belo Horizonte**) drive the core share of order volumes and customer acquisition.
