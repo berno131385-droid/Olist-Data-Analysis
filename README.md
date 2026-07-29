@@ -47,7 +47,7 @@ Raw transactional data contained missing values, text formatting inconsistencies
 ## 📐 Step 2: Data Modeling (Star Schema)
 
 To maximize query execution speed and optimize DAX measures in Power BI, the raw relational database was modeled into a **Star Schema** architecture.
-# Olist-Data-Analysis
+
 <img width="1397" height="1126" alt="Schema" src="https://github.com/user-attachments/assets/5704e547-f25e-4bfb-81d9-b9ad928720d0" />
 
 ---
