@@ -2,7 +2,7 @@
 
 [![SQL Server](https://img.shields.io/badge/Database-SQLServer-red.svg)](https://www.microsoft.com/en-us/sql-server/)
 [![PowerBI](https://img.shields.io/badge/Visualization-PowerBI-yellow.svg)](https://powerbi.microsoft.com/)
-[![Status](https://img.shields.io/badge/Status-In_Progress-brightgreen.svg)]()
+[![Status](https://img.shields.io/badge/Status-Completed-brightgreen.svg)]()
 
 An end-to-end data analytics project on Brazilian E-Commerce dataset (Olist) containing **100k+ real commercial orders** from 2016 to 2018. This project transforms raw, unstructured relational records into actionable business insights for decision-makers.
 
@@ -67,3 +67,7 @@ Five comprehensive analytical scripts were developed to answer core operational 
 ---
 
 ## 📈 Step 4: Power BI Interactive Dashboard
+<img width="1150" height="652" alt="1" src="https://github.com/user-attachments/assets/6064ed42-2b37-4bad-8f44-1b973f84d4cc" />
+<img width="1137" height="652" alt="2" src="https://github.com/user-attachments/assets/4c082e2f-12cb-432d-b100-1592f0001899" />
+
+<img width="1135" height="617" alt="3" src="https://github.com/user-attachments/assets/f599daec-6b8f-438c-93c4-a592553264da" />
